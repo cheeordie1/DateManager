@@ -75,9 +75,11 @@ End Sub
 ' have a Next Calibration Date within the next 7 days
 Sub exportDateImpendingRows(inSheet, outSheet)
     Dim inTodoIDCol, outTodoIDCol
-
+    ' Find the TODO ID column or insert at the end of the sheet
     inTodoIdCol = findOrAddCategory(inSheet, "TODO ID")
     outTodoIdCol = findOrAddCategory(outSheet, "TODO ID")
+    ' Give TODO IDs to all input rows without them
+    Call fillTodoIDs(inSheet, inTodoIdCol)
 
 End Sub
 
@@ -126,4 +128,29 @@ Sub addCategory(sheet, category)
     Next
     sheet.Cells(2, numCols) = category
     addCategory = numCols
+End Sub
+
+Sub fillTodoIDs(sheet, todoColumn)
+    Dim nextTodoID, curRowNum, curRow
+    nextTodoID = 1
+    ' Get the next TODO ID
+    For curRowNum = 3 to sheet.Rows.Count
+        Set curRow = sheet.Rows(curRowNum) 
+        If (NOT (curRow.Cells.Find("*") Is Nothing)) Then
+            If (curRow.Cells(1, todoColumn).Value2 >= nextTodoID) Then
+                nextTodoID = curRow.Cells(1, todoColumn).Value2 + 1
+            End If
+        End If
+    Next
+
+    ' For each row without a TODO ID, add one
+    For curRowNum = 3 to sheet.Rows.Count
+        Set curRow = sheet.Rows(curRowNum) 
+        If (NOT (curRow.Cells.Find("*") is Nothing)) Then
+            If (curRow.Cells(1, todoColumn).Value2 = null) Then
+                curRow.Cells(1, todoColumn).Value2 = nextTodoID
+                nextTodoID = nextTodoID + 1
+            End If
+        End If
+    Next
 End Sub
