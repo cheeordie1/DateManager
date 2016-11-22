@@ -1,0 +1,19 @@
+1. - Open ScheduleManager.bat in text editor
+   - Follow the blue comments
+     : place path to DateManager.bat where comments specify
+
+2. - Open DateManager.bat in text editor
+   - Follow the blue comments
+     : place path to manage_dates.vbs where comments specify
+
+3. - Open manage_dates.vbs in text editor
+   - Follow the blue comments
+     : place the path to the .xlsx that you want to manage the 
+       calibrtion dates where the comments specify
+
+4. Run the file ScheduleManager.bat by double-clicking or right-clicking
+   and selecting Run as Administrator.
+
+   You should now have a task set to output your TODO list in a TODO file
+   in the same directory as your .xlsx file every Monday and Thursday at 
+   11:00 AM
