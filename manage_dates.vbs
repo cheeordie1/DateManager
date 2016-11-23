@@ -101,6 +101,12 @@ Sub exportDateImpendingRows(inSheet, outSheet)
     ' Give TODO IDs to all input rows without them
     Call fillTodoIDs(inSheet, inTodoIdCol)
 
+    ' Reduce all the rows from input sheet with dates within 7 days
+    Dim inFutureShortDateCol, inPastShortDateCol, inFutureLongDateCol, inPastLongDateCol
+    Dim outFutureShortDateCol, outPastShortDateCol, outFutureLongDateCol, outPastLongDateCol
+
+    inFutureShortDateCol = findFutureShortDateColumn(inSheet)
+
 End Sub
 
 ' Function that searches for a given category in a category column
@@ -120,21 +126,21 @@ End Function
 ' Function to find the category with a given name in worksheet
 Function findCategory(sheet, category)
     Dim categoryRow, categoryNum
-    Dim hasTODOID
-    hasTODOID = false
+    Dim hasCategory
+    hasCategory = false
 
     Set categoryRow = sheet.UsedRange.Rows(2)
 
     For categoryNum = 1 to categoryRow.Cells.Count
-        If (StrComp(CStr(categoryRow.Cells(1, categoryNum)), category) = 0) Then
-            hasTODOID = true
+        If (StrComp(CStr(categoryRow.Cells(1, categoryNum)), category, vbTextCompare) = 0) Then
+            hasCategory = true
             Exit For
         ElseIf (categoryRow.Cells(1, categoryNum).Text = "") Then
             Exit For
         End If
     Next
 
-    If (hasTODOID = false) THEN
+    If (hasCategory = false) THEN
         findCategory = 0
     Else
         findCategory = categoryNum
