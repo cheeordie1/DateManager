@@ -105,16 +105,38 @@ Sub exportDateImpendingRows(inSheet, outSheet)
     ' Reduce all the rows from input sheet with dates within 7 days
     Dim inFutureShortDateCol, inPastShortDateCol, inFutureLongDateCol, inPastLongDateCol
 
+    ' Find the Columns with specific Date Categories to look for
     inFutureShortDateCol = findOneOfCategory(inSheet, Array("Next Calibration Date", "Calibration Due Date", "Next Due"))
     inPastShortDateCol = findOneOfCategory(inSheet, Array("Last Calibration Date", "Date Calibrated"))
     inFutureLongDateCol = findOneOfCategory(inSheet, Array("Next TMA Date"))
     inPastLongDateCol = findOneOfCategory(inSheet, Array("TMA Date"))
 
-    WScript.Echo CStr(inFutureShortDateCol)
-    WScript.Echo CStr(inFutureLongDateCol)
-    WScript.Echo CStr(inPastShortDateCol)
-    WScript.Echo CStr(inPastLongDateCol)
+    Dim curRow, curRowNum, inNotDataCol, continue, todayDate
+    todayDate = Date
+    inNotDataCol = findCategory(inSheet, "NOT DATA")
+    For Each curRowNum = 3 to inSheet.UsedRange.Rows.Count
+        continue = false
+        Set curRow = sheet.UsedRange.Rows(curRowNum)
+        
+        ' Stop at first empty row with no NOT DATA value
+        If (curRow.Cells.Find("*") is Nothing) Then
+            Exit For
+        End If
 
+        ' Skip NOT DATA rows
+        If (notDataColumn > 0) Then
+            If (NOT (IsEmpty(curRow.Cells(1, notDataColumn).Value))) Then
+                continue = true
+            End If
+        End If
+
+        ' Check for if the Row's date column is within 7 days of this date
+        If (hasValidDate(curRow, inFutureShortDateCol)) Then
+
+        ElseIf (hasValidDate(curRow, inFutureLongDateCol)) Then
+
+        End If
+    Next
 End Sub
 
 ' Function that synchronizes the categories from the original xlsx to the
