@@ -96,11 +96,52 @@ Sub exportDateImpendingRows(inSheet, outSheet)
     Dim inTodoIDCol, outTodoIDCol
     ' Find the TODO ID column or insert at the end of the sheet
     inTodoIdCol = findOrAddCategory(inSheet, "TODO ID")
+    Call synchronizeCategories(inSheet, outSheet)
     outTodoIdCol = findOrAddCategory(outSheet, "TODO ID")
 
     ' Give TODO IDs to all input rows without them
     Call fillTodoIDs(inSheet, inTodoIdCol)
 
+    ' Reduce all the rows from input sheet with dates within 7 days
+    Dim inFutureShortDateCol, inPastShortDateCol, inFutureLongDateCol, inPastLongDateCol
+
+    ' Find the Columns with specific Date Categories to look for
+    inFutureShortDateCol = findOneOfCategory(inSheet, Array("Next Calibration Date", "Calibration Due Date", "Next Due"))
+    inPastShortDateCol = findOneOfCategory(inSheet, Array("Last Calibration Date", "Date Calibrated"))
+    inFutureLongDateCol = findOneOfCategory(inSheet, Array("Next TMA Date"))
+    inPastLongDateCol = findOneOfCategory(inSheet, Array("TMA Date"))
+
+    Dim curRow, curRowNum, inNotDataCol, continue, todayDate
+    todayDate = Date
+    inNotDataCol = findCategory(inSheet, "NOT DATA")
+    For Each curRowNum = 3 to inSheet.UsedRange.Rows.Count
+        continue = false
+        Set curRow = sheet.UsedRange.Rows(curRowNum)
+        
+        ' Stop at first empty row with no NOT DATA value
+        If (curRow.Cells.Find("*") is Nothing) Then
+            Exit For
+        End If
+
+        ' Skip NOT DATA rows
+        If (notDataColumn > 0) Then
+            If (NOT (IsEmpty(curRow.Cells(1, notDataColumn).Value))) Then
+                continue = true
+            End If
+        End If
+
+        ' Check for if the Row's date column is within 7 days of this date
+        If (hasValidDate(curRow, inFutureShortDateCol)) Then
+
+        ElseIf (hasValidDate(curRow, inFutureLongDateCol)) Then
+
+        End If
+    Next
+End Sub
+
+' Function that synchronizes the categories from the original xlsx to the
+' TODO list. Do this later, because it will take a long time.
+Sub synchronizeCategories(inSheet, outSheet)
 End Sub
 
 ' Function that searches for a given category in a category column
@@ -117,24 +158,38 @@ Function findOrAddCategory(sheet, category)
     findOrAddCategory = categoryCol
 End Function
 
+' Find the column position of one of the categories in a list
+Function findOneOfCategory(sheet, categoryArr)
+    Dim categoryCol, category, categoryRow
+    Set categoryRow = sheet.UsedRange.Rows(2)
+    findOneOfCategory = 0
+    For Each category in categoryArr
+        categoryCol = findCategory(sheet, category)
+        If (categoryCol > 0) Then
+            findOneOfCategory = categoryCol
+            Exit For
+        End If
+    Next
+End Function
+
 ' Function to find the category with a given name in worksheet
 Function findCategory(sheet, category)
     Dim categoryRow, categoryNum
-    Dim hasTODOID
-    hasTODOID = false
+    Dim hasCategory
+    hasCategory = false
 
     Set categoryRow = sheet.UsedRange.Rows(2)
 
     For categoryNum = 1 to categoryRow.Cells.Count
-        If (StrComp(CStr(categoryRow.Cells(1, categoryNum)), category) = 0) Then
-            hasTODOID = true
+        If (StrComp(CStr(categoryRow.Cells(1, categoryNum)), category, vbTextCompare) = 0) Then
+            hasCategory = true
             Exit For
         ElseIf (categoryRow.Cells(1, categoryNum).Text = "") Then
             Exit For
         End If
     Next
 
-    If (hasTODOID = false) THEN
+    If (hasCategory = false) THEN
         findCategory = 0
     Else
         findCategory = categoryNum
