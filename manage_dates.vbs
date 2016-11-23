@@ -96,6 +96,7 @@ Sub exportDateImpendingRows(inSheet, outSheet)
     Dim inTodoIDCol, outTodoIDCol
     ' Find the TODO ID column or insert at the end of the sheet
     inTodoIdCol = findOrAddCategory(inSheet, "TODO ID")
+    Call synchronizeCategories(inSheet, outSheet)
     outTodoIdCol = findOrAddCategory(outSheet, "TODO ID")
 
     ' Give TODO IDs to all input rows without them
@@ -103,10 +104,22 @@ Sub exportDateImpendingRows(inSheet, outSheet)
 
     ' Reduce all the rows from input sheet with dates within 7 days
     Dim inFutureShortDateCol, inPastShortDateCol, inFutureLongDateCol, inPastLongDateCol
-    Dim outFutureShortDateCol, outPastShortDateCol, outFutureLongDateCol, outPastLongDateCol
 
-    inFutureShortDateCol = findFutureShortDateColumn(inSheet)
+    inFutureShortDateCol = findOneOfCategory(inSheet, Array("Next Calibration Date", "Calibration Due Date", "Next Due"))
+    inPastShortDateCol = findOneOfCategory(inSheet, Array("Last Calibration Date", "Date Calibrated"))
+    inFutureLongDateCol = findOneOfCategory(inSheet, Array("Next TMA Date"))
+    inPastLongDateCol = findOneOfCategory(inSheet, Array("TMA Date"))
 
+    WScript.Echo CStr(inFutureShortDateCol)
+    WScript.Echo CStr(inFutureLongDateCol)
+    WScript.Echo CStr(inPastShortDateCol)
+    WScript.Echo CStr(inPastLongDateCol)
+
+End Sub
+
+' Function that synchronizes the categories from the original xlsx to the
+' TODO list. Do this later, because it will take a long time.
+Sub synchronizeCategories(inSheet, outSheet)
 End Sub
 
 ' Function that searches for a given category in a category column
@@ -121,6 +134,20 @@ Function findOrAddCategory(sheet, category)
         categoryCol = addCategory(sheet, category)
     End If
     findOrAddCategory = categoryCol
+End Function
+
+' Find the column position of one of the categories in a list
+Function findOneOfCategory(sheet, categoryArr)
+    Dim categoryCol, category, categoryRow
+    Set categoryRow = sheet.UsedRange.Rows(2)
+    findOneOfCategory = 0
+    For Each category in categoryArr
+        categoryCol = findCategory(sheet, category)
+        If (categoryCol > 0) Then
+            findOneOfCategory = categoryCol
+            Exit For
+        End If
+    Next
 End Function
 
 ' Function to find the category with a given name in worksheet
