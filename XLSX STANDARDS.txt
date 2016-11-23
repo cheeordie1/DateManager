@@ -1,0 +1,55 @@
+1. No Blank Rows, Delete row if it has no data
+
+2. No Blank Columns with Data columns after, Delete blank columns
+
+3. No Columns with Data but no column type in the second Row
+
+   - Give every used column a type in Row 2
+
+4. Maintain column property type for the entire sheet.
+
+   i.e. If a column is of type "Date Calibrated" do not change the
+        type to "Section J" halfway through the sheet. Make a new
+        column of type "Section J"
+
+5. Make First Row have some kind of title **DO NOT leave blank**
+
+   i.e. "Calibration, Verification, Standardization Schedule"
+
+6. Make Second Row contain all column types used in the sheet
+
+   i.e. "Pipettor | Serial Number | Date Calibrated | Next Due | ... |"
+
+7. **IMPORTANT** Date Type Standards:
+
+   Current Specially recognized Date Types
+       Future Dates:
+     - "Next Calibration Date", "Next TMA Date", "Calibration due date",
+       "Next Due"
+
+       Past Dates:
+     - "Last Calibration Date", "TMA Date", "Date Calibrated"
+
+   A) DO NOT try to use another type name than the above for past dates or
+      future dates or else the manager won't recognize the column
+
+   B) IF POSSIBLE (not necessary), pick one type for future and past and
+      standardize it for every sheet.
+
+      i.e. Pick "Next Calibration Date", "Next TMA Date" and
+           "Last Calibration Date", "TMA Date"
+           and Change the other types to those
+
+8. If you need another title row, add a column of type "NOT DATA" to the
+   document and make the value 1 for each title row so that the Date
+   Manager can skip them. The value for "NOT DATA" column in rows with
+   data should just be blank.
+
+   i.e. Here, row 132 has a row the parser should skip because it contains
+        no data, it is just a sub-title added to the worksheet
+
+                A-H                  I        J        K
+    1 |     "Title Row"         |          |      |          |
+    2 |         ...             | Serial # | Date | NOT DATA |
+                                
+   132| "Cannon-Fenske Opaque"  |          |      |     1    |
