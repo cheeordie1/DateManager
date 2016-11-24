@@ -53,3 +53,13 @@
     2 |         ...             | Serial # | Date | NOT DATA |
                                 
    132| "Cannon-Fenske Opaque"  |          |      |     1    |
+
+9. Properly format Dates:
+
+   For a Date column, you can have any text in it as long as your actual Date
+   looks like dd/mm/yyyy or d/mm/yyyy or dd.mm.yyy or d.mm.yyyy or dd-mm-yyy or
+   d-mm-yyyy
+
+   i.e. "Some text and then the date is 8/23/2016"
+   	or
+   	"09-22-2014
