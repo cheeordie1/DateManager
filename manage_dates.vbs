@@ -112,11 +112,12 @@ Sub exportDateImpendingRows(inSheet, outSheet)
     inPastLongDateCol = findOneOfCategory(inSheet, Array("TMA Date"))
 
     Dim curRow, curRowNum, inNotDataCol, continue, todayDate
+    Dim futureLongDate, futureShortDate, reduceRow
     todayDate = Date
     inNotDataCol = findCategory(inSheet, "NOT DATA")
-    For Each curRowNum = 3 to inSheet.UsedRange.Rows.Count
+    For curRowNum = 3 to inSheet.UsedRange.Rows.Count
         continue = false
-        Set curRow = sheet.UsedRange.Rows(curRowNum)
+        Set curRow = inSheet.UsedRange.Rows(curRowNum)
         
         ' Stop at first empty row with no NOT DATA value
         If (curRow.Cells.Find("*") is Nothing) Then
@@ -124,20 +125,76 @@ Sub exportDateImpendingRows(inSheet, outSheet)
         End If
 
         ' Skip NOT DATA rows
-        If (notDataColumn > 0) Then
-            If (NOT (IsEmpty(curRow.Cells(1, notDataColumn).Value))) Then
+        If (inNotDataCol > 0) Then
+            If (NOT (IsEmpty(curRow.Cells(1, inNotDataCol)))) Then
                 continue = true
             End If
         End If
 
         ' Check for if the Row's date column is within 7 days of this date
-        If (hasValidDate(curRow, inFutureShortDateCol)) Then
-
-        ElseIf (hasValidDate(curRow, inFutureLongDateCol)) Then
-
+        If (inFutureShortDateCol <> 0) Then
+            futureShortDate = parseDate(curRow.Cells(1, inFutureShortDateCol))
+        Else
+            futureShortDate = ""
         End If
+        If (inFutureLongDateCol <> 0) Then
+            futureLongDate = parseDate(curRow.Cells(1, inFutureLongDateCol))
+        Else
+            futureLongDate = ""
+        End If
+
+        reduceRow = false
+        If (futureShortDate <> "") Then
+            If (Abs(DateDiff("d", todayDate, CDate(futureShortDate))) < 7) Then
+                reduceRow = true
+            End If
+        End If
+        If (futureLongDate <> "") Then
+            If (Abs(DateDiff("d", todayDate, CDate(futureLongDate))) < 7) Then
+                reduceRow = true
+            End If
+        End If
+
+        ' If reduceRow is true, reduce the row
+        If (reduceRow = true) Then
+            Call reduceRowToSheet(curRow, outSheet, inTodoIdCol, outTodoIdCol)
+        End If
+
     Next
 End Sub
+
+' Add Row to sheet if the output sheet doesn't have the same row already
+' Check todoIDs to see if the output sheet contains the row
+Sub reduceRowToSheet(row, outSheet, inTodoIdCol, outTodoIdCol)
+    ' Check to see if outSheet already contains the TODO ID
+    Dim checkID
+    checkID = row.Cells(1,inTodoIdCol).Value
+    If (outSheet.UsedRange.Columns(outTodoIdCol).Find(checkID) Is Nothing) Then
+        ' If TODO ID is not already present, print the row to the first line of the todo list
+        outSheet.Rows(3).Insert(-4121)
+        row.Copy
+        outSheet.Rows(3).PasteSpecial(8)
+        outSheet.Rows(3).PasteSpecial(-4163)
+        outSheet.Rows(3).PasteSpecial(-4122)
+    End If
+End Sub
+
+' Function that parses a date from a cell Returns nothing if there is no valid date
+Function parseDate(cell)
+    Dim regex, result
+    Set regex = new RegExp
+    regex.pattern = "(\d{1,2}\/\d{1,2}\/\d{4})|" & _
+                    "(\d{1,2}\.\d{1,2}\.\d{4})|" & _ 
+                    "(\d{1,2}\-\d{1,2}\-\d{4})|" & _ 
+                    "(\d{4})\-\d{1,2}\-\d{1,2}"
+    Set result = regex.execute(cell.Text)
+    If (regex.test(cell.Text)) Then
+        parseDate = result(0).value
+    Else
+        parseDate = ""
+    End if
+End Function
+
 
 ' Function that synchronizes the categories from the original xlsx to the
 ' TODO list. Do this later, because it will take a long time.
@@ -226,14 +283,14 @@ Sub fillTodoIDs(sheet, todoColumn)
 
         ' Skip NOT DATA rows
         If (notDataColumn > 0) Then
-            If (NOT (IsEmpty(curRow.Cells(1, notDataColumn).Value))) Then
+            If (NOT (IsEmpty(curRow.Cells(1, notDataColumn)))) Then
                 continue = true
             End If
         End If
 
         ' If column has a TODO ID, set the max TODO ID respectively
         If (continue = false) Then
-            If (NOT (IsEmpty(curRow.Cells(1, todoColumn).Value))) Then
+            If (NOT (IsEmpty(curRow.Cells(1, todoColumn)))) Then
                 If (curRow.Cells(1, todoColumn).Value2 >= nextTodoID) Then
                     nextTodoID = curRow.Cells(1, todoColumn).Value2 + 1
                 End If
@@ -254,14 +311,14 @@ Sub fillTodoIDs(sheet, todoColumn)
 
         ' Skip NOT DATA rows
         If (notDataColumn > 0) Then
-            If (NOT (IsEmpty(curRow.Cells(1, notDataColumn).Value))) Then
+            If (NOT (IsEmpty(curRow.Cells(1, notDataColumn)))) Then
                 continue = true
             End If
         End If
 
         ' If column has a TODO ID, set the max TODO ID respectively
         If (continue = false) Then
-            If (IsEmpty(curRow.Cells(1, todoColumn).Value)) Then
+            If (IsEmpty(curRow.Cells(1, todoColumn))) Then
                 curRow.Cells(1, todoColumn) = nextTodoID
                 nextTodoID = nextTodoID + 1
             End If
