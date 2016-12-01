@@ -167,15 +167,14 @@ End Sub
 ' Check todoIDs to see if the output sheet contains the row
 Sub reduceRowToSheet(row, outSheet, inTodoIdCol, outTodoIdCol)
     ' Check to see if outSheet already contains the TODO ID
-    Dim checkID
+    Dim checkID, curCol
     checkID = row.Cells(1,inTodoIdCol).Value
     If (outSheet.UsedRange.Columns(outTodoIdCol).Find(checkID) Is Nothing) Then
         ' If TODO ID is not already present, print the row to the first line of the todo list
         outSheet.Rows(3).Insert(-4121)
-        row.Copy
-        outSheet.Rows(3).PasteSpecial(8)
-        outSheet.Rows(3).PasteSpecial(-4163)
-        outSheet.Rows(3).PasteSpecial(-4122)
+        For curCol =  1 to row.Cells.Count
+            outSheet.Rows(3).Cells(1, curCol) = row.Cells(1,curCol)
+        Next
     End If
 End Sub
 
