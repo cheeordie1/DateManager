@@ -173,7 +173,7 @@ Sub reduceRowToSheet(row, outSheet, inTodoIdCol, outTodoIdCol)
         ' If TODO ID is not already present, print the row to the first line of the todo list
         outSheet.Rows(3).Insert(-4121)
         For curCol =  1 to row.Cells.Count
-            outSheet.Rows(3).Cells(1, curCol) = row.Cells(1,curCol)
+            row.Cells(1,curCol).Copy(outSheet.Rows(3).Cells(1, curCol))
         Next
     End If
 End Sub
